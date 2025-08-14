@@ -1,0 +1,11 @@
+django
+djangorestframework
+psycopg2-binary
+django-cors-headers
+gunicorn
+djangorestframework-simplejwt
+requests
+python-dateutil
+django-allauth
+django-allauth[socialaccount]
+dj-rest-auth
