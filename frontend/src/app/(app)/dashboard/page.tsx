@@ -2,9 +2,11 @@
 
 import { useEffect, useState, useCallback, useMemo } from 'react';
 import apiClient from '@/lib/api';
+import { useAuthStore } from '@/store/auth-store';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from "@/components/ui/skeleton";
-import { DollarSign, CreditCard } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import { DollarSign, CreditCard, Plus } from 'lucide-react';
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Pie, PieChart, Cell, Legend } from 'recharts';
 import { getMonth, parseISO } from 'date-fns';
 import { CHART_COLORS } from '@/lib/chart-colors';
@@ -47,13 +49,19 @@ function DashboardSkeleton() {
 }
 
 export default function DashboardPage() {
+  const { status } = useAuthStore();
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
 
+
   const fetchData = useCallback(() => {
+    if (status !== 'authenticated') return;
+    
     setLoading(true);
+    
+    
     Promise.all([
       apiClient.get('/accounts/'),
       apiClient.get('/transactions/'),
@@ -68,9 +76,11 @@ export default function DashboardPage() {
       setTransactions(paginatedTransactions.results);
       setCategories(paginatedCategories.results);
 
-    }).catch(error => console.error('Failed to fetch dashboard data:', error))
-      .finally(() => setLoading(false));
-  }, []);
+    }).catch(error => {
+      console.error('Failed to fetch dashboard data:', error);
+              console.error('Failed to load data:', error);
+    }).finally(() => setLoading(false));
+  }, [status]);
 
   useEffect(() => {
     fetchData();
@@ -122,6 +132,8 @@ export default function DashboardPage() {
   }, [transactions]);
 
   if (loading) return <DashboardSkeleton />;
+
+
 
   return (
     <div>

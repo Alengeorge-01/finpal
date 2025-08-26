@@ -16,14 +16,28 @@ export default function AuthProvider({
 
   // This effect runs once on the client after the initial render
   useEffect(() => {
+    console.log('🚀 AuthProvider mounting, calling checkAuth()');
     setIsMounted(true);
     checkAuth();
   }, [checkAuth]);
 
   useEffect(() => {
+    console.log('🛡️ AuthProvider effect - mounted:', isMounted, 'status:', status, 'pathname:', pathname);
+    
     // Wait until the component is mounted and the auth check is complete
-    if (isMounted && status === 'unauthenticated' && pathname.startsWith('/dashboard')) {
-      router.push('/login');
+    if (isMounted && status === 'unauthenticated') {
+      // Protected routes that require authentication
+      const protectedRoutes = ['/dashboard', '/accounts', '/transactions', '/budgets', '/goals', '/investments', '/loans', '/settings', '/ai-planner', '/categories', '/subscriptions', '/search'];
+      const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route));
+      
+      console.log('🔒 Route protection check - isProtected:', isProtectedRoute, 'route:', pathname);
+      
+      if (isProtectedRoute) {
+        console.log('🚫 Redirecting to login - unauthenticated access to protected route:', pathname);
+        router.push('/login');
+      }
+    } else if (isMounted) {
+      console.log('✅ Auth check passed - status:', status, 'pathname:', pathname);
     }
   }, [isMounted, status, pathname, router]);
 
